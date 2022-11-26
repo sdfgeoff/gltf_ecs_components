@@ -1,5 +1,5 @@
 
-# GLTF Component Exporter
+# GLTF ECS Components
 
 ## What is this?
 
