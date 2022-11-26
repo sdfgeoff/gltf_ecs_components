@@ -1,0 +1,11 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "All The Things",
+    "description": "Tests all the supported features in the exporter",
+    "properties": {
+      "type": {
+        "const": "allTheThings"
+      }
+    }
+  }
