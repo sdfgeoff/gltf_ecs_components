@@ -1,7 +1,7 @@
 """
 Functions used to find and load component definitions
 """
-from typing import List, TypedDict, Tuple
+from typing import List, Tuple, cast
 import functools
 import logging
 import os
@@ -10,26 +10,9 @@ import json
 import bpy
 
 from .utils import jdict
+from .component_schema import ComponentSchema, get_id
 
 logger = logging.getLogger(__name__)
-
-
-class ComponentSchemaType(TypedDict):
-    """What type of component"""
-
-    const: str
-
-
-class ComponentSchemaProperties(TypedDict):
-    """Properties contained in the component"""
-
-    type: ComponentSchemaType
-
-
-class ComponentSchema(TypedDict):
-    """The bare minimum definition/metadata about a schema"""
-
-    properties: ComponentSchemaProperties
 
 
 def get_components() -> List[ComponentSchema]:
@@ -46,9 +29,7 @@ def load_components(paths: Tuple[str]) -> List[ComponentSchema]:
         components.extend(load_schemas(path))
 
     # Check for component type collisions
-    component_types = [
-        component["properties"]["type"]["const"] for component in components
-    ]
+    component_types = [get_id(component) for component in components]
     if len(set(component_types)) != len(component_types):
         logging.warning(jdict(event="duplicate_component_types", types=component_types))
 
@@ -108,4 +89,4 @@ def parse_schema(path: str) -> ComponentSchema:
     logger.debug(
         jdict(event="loading_component", path=path, state="end", type=type_data)
     )
-    return data
+    return cast(ComponentSchema, data)
