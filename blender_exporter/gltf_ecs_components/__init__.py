@@ -7,7 +7,7 @@ import bpy
 
 from .utils import jdict
 from .component_finder import get_components
-from .component_schema import get_title, get_description
+from .component_schema import get_title, get_description, get_id
 from .operators import AddEcsComponent, RemoveEcsComponent, has_component
 
 logger = logging.getLogger(__name__)
@@ -32,27 +32,24 @@ class EcsComponentsPanel(bpy.types.Panel):  # pylint: disable=R0903
     def draw(self, context):
         """Create the UI for the panel"""
         row = self.layout.row()
-        row.operator("object.add_ecs_component")
-        row.operator("object.remove_ecs_component")
-
-        # I would like to do this, but it still brings up the UI
-        # and I don't know how to get it to show the UI when clicking
-        # the generic add ones, but remove it when clicking a specific add
-        # button.....
-        #
-        # for component in get_components():
-        #     if not has_component(context.object, component):
-        #         op = row.operator(
-        #             "object.add_ecs_component", text=get_title(component), icon="ADD"
-        #         )
-        #         op.property_to_add = get_id(component)  # type: ignore
-        #     else:
-        #         op = row.operator(
-        #             "object.remove_ecs_component",
-        #             text=get_title(component),
-        #             icon="REMOVE",
-        #         )
-        #         op.property_to_add = get_id(component)  # type: ignore
+        row.operator_context = "EXEC_DEFAULT"
+        
+        for component in get_components():
+            if not has_component(context.object, component):
+                op = row.operator(
+                    "object.add_ecs_component", text=get_title(component), icon="ADD"
+                )
+                op.property_to_add = get_id(component)  # type: ignore
+            else:
+                op = row.operator(
+                    "object.remove_ecs_component",
+                    text=get_title(component),
+                    icon="REMOVE",
+                )
+                op.property_to_remove = get_id(component)  # type: ignore
+        
+        row.operator_context = "INVOKE_DEFAULT"
+                
         for component in get_components():
             if has_component(context.object, component):
                 col = self.layout.column(align=True)
